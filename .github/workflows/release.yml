@@ -3,6 +3,9 @@ name: Deploy to Github
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   distribute:
     name: Distribute apk to Github
