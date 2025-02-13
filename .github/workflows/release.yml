@@ -34,6 +34,9 @@ jobs:
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           alias: ${{ secrets.ALIAS }}
+        env:
+          # override default build-tools version (33.0.0) -- optional
+          BUILD_TOOLS_VERSION: "34.0.0"
 
       - name: Release
         uses: softprops/action-gh-release@v1
