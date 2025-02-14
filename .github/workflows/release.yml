@@ -21,22 +21,22 @@ jobs:
           java-version: 18
           cache: 'gradle'
 
-      - name: Version Bump
-        uses: chkfung/android-version-actions@v1.2.3
-        with:
-          gradlePath: app/build.gradle.kts
-          versionCode: ${{ github.run_number }}
-
       - name: Assemble Release
         run: ./gradlew assembleRelease
+
+      - name: Extract Version
+        run: |
+          echo "VERSION_NAME=$(./gradlew -q printVersionInformation)" >> $GITHUB_ENV
+          echo "Current version: ${{ env.VERSION_NAME }}"
 
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           # override default build-tools version (33.0.0) -- optional
           BUILD_TOOLS_VERSION: "34.0.0"
@@ -44,5 +44,5 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.run_id }}
+          tag_name: ${{ env.VERSION_NAME }}
           files: app/build/outputs/apk/release/app-release.apk
