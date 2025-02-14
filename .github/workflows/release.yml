@@ -42,7 +42,5 @@ jobs:
           BUILD_TOOLS_VERSION: "34.0.0"
 
       - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.VERSION_NAME }}
-          files: ${{ steps.sign_app.outputs.signedReleaseFile }}
+      - run: |
+          gh release create $GITHUB_ENV ${{ steps.sign_app.outputs.signedReleaseFile }}
