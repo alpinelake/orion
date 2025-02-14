@@ -27,10 +27,10 @@ jobs:
       - name: Extract Version
         run: |
           echo "VERSION_NAME=$(./gradlew -q printVersionInformation)" >> $GITHUB_ENV
-          echo "Current version: ${{ env.VERSION_NAME }}"
 
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1
+        id: sign_app
         with:
           releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -45,4 +45,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION_NAME }}
-          files: app/build/outputs/apk/release/app-release-unsigned.apk
+          files: ${{ steps.sign_app.outputs.signedReleaseFile }}
