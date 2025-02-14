@@ -45,4 +45,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION_NAME }}
-          files: app/build/outputs/apk/release/app-release.apk
+          files: app/build/outputs/apk/release/app-release-unsigned.apk
