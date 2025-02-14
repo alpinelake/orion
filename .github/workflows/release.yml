@@ -42,5 +42,5 @@ jobs:
           BUILD_TOOLS_VERSION: "34.0.0"
 
       - name: Release
-      - run: |
+        run: |
           gh release create $GITHUB_ENV ${{ steps.sign_app.outputs.signedReleaseFile }}
