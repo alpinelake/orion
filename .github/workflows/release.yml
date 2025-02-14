@@ -43,6 +43,6 @@ jobs:
 
       - name: Release
         run: |
-          gh release create $GITHUB_ENV ${{ steps.sign_app.outputs.signedReleaseFile }}
+          gh release create ${{ env.VERSION_NAME }} ${{ steps.sign_app.outputs.signedReleaseFile }}
         env:
           GH_TOKEN: ${{ github.token }}
