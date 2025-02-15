@@ -166,13 +166,6 @@ class AppViewModel @Inject constructor(
 
     fun insertOrUpdate(item: HomeItem, modified: Boolean) {
         viewModelScope.launch {
-//            if (owner != null) {
-//                if (owner.ownerId == 0) {
-//                    repository.insert(owner)
-//                } else {
-//                    repository.update(owner)
-//                }
-//            }
             val lastId = if (item.id == 0) {
                 repository.insert(item.toItem().copy(
                     created = Clock.System.now().epochSeconds
@@ -182,7 +175,7 @@ class AppViewModel @Inject constructor(
                     if (modified) it.copy(modified = Clock.System.now().epochSeconds)
                     else it
                 })
-                item.itemCreatorId.toLong()
+                item.id.toLong()
             }
             if (modified) {
                 _uiState.update {
