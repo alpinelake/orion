@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
@@ -28,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,16 +46,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.orion.AppViewModel
 import com.example.orion.DataImportState
 import com.example.orion.R
+import com.example.orion.UiState
 import com.example.orion.data.FakeDataRepository
 import com.example.orion.data.HomeItem
 import com.example.orion.data.Item
 import com.example.orion.data.ItemCategory
 import com.example.orion.data.ItemState
-import com.example.orion.data.Owner
 import com.example.orion.data.SettingsDataStoreManager
 import com.example.orion.network.DataImporter
 import com.example.orion.ui.component.ItemSortMenu
 import com.example.orion.ui.theme.AppTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,8 +69,6 @@ fun HomeScreen(
     val focusManager = LocalFocusManager.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val uiFilterState by viewModel.uiFilterState.collectAsStateWithLifecycle()
-    val items = uiState.items
-    val owners = uiState.owners
     val query = uiFilterState.text
     val categories = uiFilterState.categories
     var itemForEdit: HomeItem? by remember { mutableStateOf(null) }
@@ -215,8 +216,7 @@ fun HomeScreen(
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 HomeScreenContent(
-                    items = items,
-                    owners = owners,
+                    uiState = uiState,
                     onHoldItem = { itemForEdit = it },
                     onSwipeItem = { item, dragValue ->
                         if (item.state != ItemState.Done && dragValue == DragValue.Start) {
@@ -231,9 +231,8 @@ fun HomeScreen(
                             )
                         }
                     },
-                    onFilter = {
-                        viewModel.toggleFilterCategory(it)
-                    }
+                    onFilter = viewModel::toggleFilterCategory,
+                    resetAutoScroll = viewModel::resetLastId
                 )
                 itemForEdit?.let { item ->
                     ItemDialog(
@@ -242,7 +241,7 @@ fun HomeScreen(
                         onDismissRequest = { itemForEdit = null },
                         onSaveItem = { updated ->
                             if (updated.name.isNotBlank()) {
-                                viewModel.insertOrUpdate(updated)
+                                viewModel.insertOrUpdate(updated, modified = true)
                                 itemForEdit = null
                             }
                         },
@@ -287,41 +286,26 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
-    items: List<HomeItem>,
-    owners: Set<Owner>,
+    uiState: UiState,
     onHoldItem: (HomeItem) -> Unit,
     onSwipeItem: (HomeItem, DragValue) -> Unit,
-    onFilter: (ItemCategory) -> Unit
+    onFilter: (ItemCategory) -> Unit,
+    resetAutoScroll: () -> Unit
 ) {
-    val pinned = items.filter { it.state == ItemState.Pinned }
-    val others = items.filterNot { it.state == ItemState.Pinned }
+    val sorted = uiState.items.sortedByDescending { it.state == ItemState.Pinned }
+    val listState = rememberLazyListState()
     LazyColumn(
         modifier = modifier.padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp)
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+        state = listState
     ) {
         items(
-            items = pinned,
+            items = sorted,
             key = { item ->
                 "${item.id}${item.modified}${item.state}"
             }
         ) { item ->
-            val owner = owners.first { it.ownerId == item.itemCreatorId }
-            ItemCard(
-                item = item,
-                owner = owner,
-                isExpanded = false,
-                onHoldItem = { onHoldItem(item) },
-                onSwipeItem = { onSwipeItem(item, it) },
-                onFilter = onFilter
-            )
-        }
-        items(
-            items = others,
-            key = { item ->
-                "${item.id}${item.modified}${item.state}"
-            }
-        ) { item ->
-            val owner = owners.first { it.ownerId == item.itemCreatorId }
+            val owner = uiState.owners.first { it.ownerId == item.itemCreatorId }
             ItemCard(
                 item = item,
                 owner = owner,
@@ -332,6 +316,17 @@ private fun HomeScreenContent(
             )
         }
     }
+
+    LaunchedEffect(key1 = uiState.lastId, key2 = uiState.items, block = {
+        if (uiState.lastId != 0L) {
+            val i = sorted.indexOfFirst { it.id.toLong() == uiState.lastId }
+            if (i >= 0) {
+                listState.animateScrollToItem(index = i)
+            }
+            delay(1000)
+            resetAutoScroll()
+        }
+    })
 }
 
 @Preview(showBackground = true)

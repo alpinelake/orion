@@ -136,7 +136,7 @@ fun ItemCard(
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.bodyLarge,
-                    maxLines = if (expanded) Int.MAX_VALUE else 2,
+                    maxLines = if (expanded) Int.MAX_VALUE else 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
@@ -154,7 +154,7 @@ fun ItemCard(
                     text = item.note,
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = if (expanded) Int.MAX_VALUE else 4,
+                    maxLines = if (expanded) Int.MAX_VALUE else 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }

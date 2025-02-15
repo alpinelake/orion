@@ -89,7 +89,7 @@ interface ItemDao {
     @Query("SELECT * FROM owner")
     fun getOwners(): Flow<List<Owner>>
     @Insert
-    suspend fun insert(item: Item)
+    suspend fun insert(item: Item): Long
     @Update
     suspend fun update(item: Item)
     @Delete

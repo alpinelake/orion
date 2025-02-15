@@ -6,7 +6,7 @@ interface DataRepository {
 
     fun getItems(): Flow<List<Item>>
     fun getOwners(): Flow<List<Owner>>
-    suspend fun insert(item: Item)
+    suspend fun insert(item: Item): Long
     suspend fun update(item: Item)
     suspend fun delete(item: Item)
     suspend fun insert(owner: Owner): Long

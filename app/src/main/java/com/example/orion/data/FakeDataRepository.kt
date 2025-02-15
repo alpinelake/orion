@@ -52,7 +52,7 @@ class FakeDataRepository : DataRepository {
             Item(
                 id = ++itemId,
                 itemCreatorId = defaultOwner.ownerId,
-                name = "Game title 1",
+                name = "Game title 1 long enough to take multiple lines",
                 note = """
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                     """.trimIndent(),
@@ -83,7 +83,9 @@ class FakeDataRepository : DataRepository {
             emit(owners)
         }
     }
-    override suspend fun insert(item: Item) {}
+    override suspend fun insert(item: Item): Long {
+        TODO("Not yet implemented")
+    }
     override suspend fun update(item: Item) {}
     override suspend fun delete(item: Item) {}
     override suspend fun insert(owner: Owner): Long {

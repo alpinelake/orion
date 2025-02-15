@@ -28,7 +28,8 @@ import javax.inject.Inject
 data class UiState(
     val items: List<HomeItem>,
     val owners: Set<Owner>,
-    val dataImportState: DataImportState
+    val dataImportState: DataImportState,
+    val lastId: Long = 0
 )
 
 sealed interface DataImportState {
@@ -163,7 +164,7 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    fun insertOrUpdate(item: HomeItem, modified: Boolean = true) {
+    fun insertOrUpdate(item: HomeItem, modified: Boolean) {
         viewModelScope.launch {
 //            if (owner != null) {
 //                if (owner.ownerId == 0) {
@@ -172,7 +173,7 @@ class AppViewModel @Inject constructor(
 //                    repository.update(owner)
 //                }
 //            }
-            if (item.id == 0) {
+            val lastId = if (item.id == 0) {
                 repository.insert(item.toItem().copy(
                     created = Clock.System.now().epochSeconds
                 ))
@@ -181,7 +182,19 @@ class AppViewModel @Inject constructor(
                     if (modified) it.copy(modified = Clock.System.now().epochSeconds)
                     else it
                 })
+                item.itemCreatorId.toLong()
             }
+            if (modified) {
+                _uiState.update {
+                    it.copy(lastId = lastId)
+                }
+            }
+        }
+    }
+
+    fun resetLastId() {
+        _uiState.update {
+            it.copy(lastId = 0)
         }
     }
 
