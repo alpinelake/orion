@@ -41,8 +41,16 @@ jobs:
           # override default build-tools version (33.0.0) -- optional
           BUILD_TOOLS_VERSION: "34.0.0"
 
+      - name: Generate Name
+        run: |
+          echo "OUTPUT_NAME=orion-release-${{ env.VERSION_NAME }}" >> $GITHUB_ENV
+
+      - name: Rename APK
+        run:
+          mv ${{ steps.sign_app.outputs.signedReleaseFile }} "./app/build/outputs/apk/release/${{ env.OUTPUT_NAME }}.apk"
+
       - name: Release
         run: |
-          gh release create ${{ env.VERSION_NAME }} ${{ steps.sign_app.outputs.signedReleaseFile }}
+          gh release create ${{ env.VERSION_NAME }} "./app/build/outputs/apk/release/${{ env.OUTPUT_NAME }}.apk"
         env:
           GH_TOKEN: ${{ github.token }}
