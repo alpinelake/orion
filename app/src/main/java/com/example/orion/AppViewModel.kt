@@ -109,8 +109,8 @@ class AppViewModel @Inject constructor(
                     items
                 }.let {
                     if (filter.hideArchived) {
-                        items.filterNot { it.state == ItemState.Done }
-                    } else items
+                        it.filterNot { item -> item.state == ItemState.Done }
+                    } else it
                 }
                 Pair(
                     owners,
