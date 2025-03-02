@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +51,7 @@ import com.example.orion.data.ItemState
 import com.example.orion.data.Owner
 import com.example.orion.data.toHomeItem
 import com.example.orion.ui.theme.AppTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun ItemDialog(
@@ -57,7 +59,8 @@ fun ItemDialog(
     item: HomeItem,
     onDismissRequest: () -> Unit,
     onSaveItem: (HomeItem) -> Unit,
-    onDeleteItem: () -> Unit
+    onDeleteItem: () -> Unit,
+    hintCategories: Boolean = false
 ) {
     Dialog(
         onDismissRequest = onDismissRequest
@@ -67,7 +70,8 @@ fun ItemDialog(
             owner = uiState.owners.firstOrNull { it.ownerId == item.itemCreatorId },
             onSave = onSaveItem,
             onDismissRequest = onDismissRequest,
-            onDelete = onDeleteItem
+            onDelete = onDeleteItem,
+            hintCategories = hintCategories
         )
     }
 }
@@ -78,7 +82,8 @@ private fun ItemDialogContent(
     owner: Owner?,
     onSave: (HomeItem) -> Unit,
     onDismissRequest: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    hintCategories: Boolean = false
 ) {
     val focusRequester = remember { FocusRequester() }
     var name by remember { mutableStateOf(item.name) }
@@ -86,6 +91,12 @@ private fun ItemDialogContent(
     var state by remember { mutableStateOf(item.state) }
     var expand by remember { mutableStateOf(false) }
     var category by remember { mutableStateOf(item.category) }
+    LaunchedEffect(Unit) {
+        if (hintCategories) {
+            delay(200)
+            expand = true
+        }
+    }
     val save = {
         onSave(item.copy(
             name = name.trim(),

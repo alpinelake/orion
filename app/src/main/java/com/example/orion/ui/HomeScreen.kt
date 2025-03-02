@@ -205,7 +205,7 @@ fun HomeScreen(
                                 itemCreatorId = 1,
                                 name = "",
                                 state = ItemState.Default,
-                                category = ItemCategory.None
+                                category = ItemCategory.TV
                             )
                         }
                     ) {
@@ -248,7 +248,8 @@ fun HomeScreen(
                         onDeleteItem = {
                             itemForEdit = null
                             viewModel.delete(item)
-                        }
+                        },
+                        hintCategories = uiState.items.isEmpty()
                     )
                 }
                 when (uiState.dataImportState) {
