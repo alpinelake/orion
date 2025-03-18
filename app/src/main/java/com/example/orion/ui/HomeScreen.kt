@@ -87,7 +87,6 @@ fun HomeScreen(
         }
     }
     ModalNavigationDrawer(
-        gesturesEnabled = drawerState.isOpen,
         drawerState = drawerState,
         drawerContent = {
             NavDrawerSheet(
@@ -218,19 +217,6 @@ fun HomeScreen(
                 HomeScreenContent(
                     uiState = uiState,
                     onHoldItem = { itemForEdit = it },
-                    onSwipeItem = { item, dragValue ->
-                        if (item.state != ItemState.Done && dragValue == DragValue.Start) {
-                            viewModel.insertOrUpdate(
-                                item = item.copy(state = ItemState.Done),
-                                modified = false
-                            )
-                        } else if (item.state == ItemState.Done && dragValue == DragValue.End) {
-                            viewModel.insertOrUpdate(
-                                item = item.copy(state = ItemState.Default),
-                                modified = false
-                            )
-                        }
-                    },
                     onFilter = viewModel::toggleFilterCategory,
                     resetAutoScroll = viewModel::resetLastId
                 )
@@ -289,7 +275,6 @@ private fun HomeScreenContent(
     modifier: Modifier = Modifier,
     uiState: UiState,
     onHoldItem: (HomeItem) -> Unit,
-    onSwipeItem: (HomeItem, DragValue) -> Unit,
     onFilter: (ItemCategory) -> Unit,
     resetAutoScroll: () -> Unit
 ) {
@@ -312,7 +297,6 @@ private fun HomeScreenContent(
                 owner = owner,
                 isExpanded = false,
                 onHoldItem = { onHoldItem(item) },
-                onSwipeItem = { onSwipeItem(item, it) },
                 onFilter = onFilter
             )
         }

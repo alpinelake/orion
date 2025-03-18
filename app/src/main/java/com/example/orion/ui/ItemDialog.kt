@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -114,36 +115,59 @@ private fun ItemDialogContent(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(1.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable(enabled = item.id != 0) {
-                        onDelete()
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(1.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable(enabled = item.id != 0) {
+                            onDelete()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            "Delete",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
+                }
+                Row(
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Delete,
+                        imageVector = Icons.Default.TaskAlt,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = if (state == ItemState.Done) color
+                        else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable {
+                            state = if (state == ItemState.Done) ItemState.Default
+                            else ItemState.Done
+                            save()
+                        }
                     )
-                    Text("Delete",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.primary
+                    Icon(
+                        imageVector = Icons.Default.PushPin,
+                        contentDescription = null,
+                        tint = if (state == ItemState.Pinned) color
+                        else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable {
+                            state = if (state == ItemState.Pinned) ItemState.Default
+                            else ItemState.Pinned
+                            save()
+                        }
                     )
                 }
-                Icon(
-                    imageVector = Icons.Default.PushPin,
-                    contentDescription = null,
-                    tint = if (state == ItemState.Pinned) color
-                    else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable {
-                        state = if (state == ItemState.Pinned) ItemState.Default
-                        else ItemState.Pinned
-                    }
-                )
             }
             Row(
                 modifier = Modifier,

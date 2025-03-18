@@ -1,20 +1,13 @@
 package com.example.orion.ui
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,13 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.orion.data.FakeDataRepository
@@ -48,9 +39,6 @@ import com.example.orion.data.ItemState
 import com.example.orion.data.Owner
 import com.example.orion.data.toHomeItem
 import com.example.orion.ui.theme.AppTheme
-import kotlin.math.roundToInt
-
-enum class DragValue { Start, Center, End }
 
 @Composable
 fun ItemCard(
@@ -59,38 +47,8 @@ fun ItemCard(
     owner: Owner,
     isExpanded: Boolean = false,
     onHoldItem: () -> Unit,
-    onSwipeItem: (DragValue) -> Unit,
     onFilter: (ItemCategory) -> Unit
 ) {
-    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
-    val swipeDistanceDp = 400.dp
-    val swipeDistancePx = with(LocalDensity.current) { swipeDistanceDp.toPx() }
-    val swipeToDismissThreshold = 0.9f
-    val swipeVelocityPx = with(LocalDensity.current) { swipeDistanceDp.toPx() }
-    val state = remember {
-        AnchoredDraggableState(
-            initialValue = DragValue.Center,
-            positionalThreshold = { totalDistance -> totalDistance * swipeToDismissThreshold },
-            velocityThreshold = { swipeVelocityPx },
-            snapAnimationSpec = tween(),
-            decayAnimationSpec = decayAnimationSpec,
-            confirmValueChange = {
-                if (it == DragValue.Start || it == DragValue.End) {
-                    onSwipeItem(it)
-                }
-                false
-            }
-        )
-    }.apply {
-        updateAnchors(
-            DraggableAnchors {
-                DragValue.Start at swipeDistancePx.unaryMinus()
-                DragValue.Center at 0f
-                DragValue.End at swipeDistancePx
-            }
-        )
-    }
-
     val highlight = colorResource(item.category.colorId())
     var expanded by remember { mutableStateOf(isExpanded) }
     Card(
@@ -101,15 +59,6 @@ fun ItemCard(
     ) {
         Column(
             modifier = Modifier
-                .offset {
-                    IntOffset(
-                        x = state
-                            .requireOffset()
-                            .roundToInt(),
-                        y = 0
-                    )
-                }
-                .anchoredDraggable(state, Orientation.Horizontal)
                 .combinedClickable(
                     onClick = {
                         expanded = !expanded
@@ -188,7 +137,6 @@ fun ItemCard(
 }
 
 private class ItemProvider: PreviewParameterProvider<HomeItem> {
-
     override val values: Sequence<HomeItem> =
         FakeDataRepository.items.map { item ->
             item.toHomeItem()
@@ -207,7 +155,6 @@ private fun ItemCardPreview(
             item = item,
             owner = owner,
             onHoldItem = {},
-            onSwipeItem = {},
             isExpanded = item.id == 1 || item.id == 5,
             onFilter = {}
         )
