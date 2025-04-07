@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.orion.AppViewModel
 import com.example.orion.DataImportState
+import com.example.orion.ItemAction
 import com.example.orion.R
 import com.example.orion.UiState
 import com.example.orion.data.FakeDataRepository
@@ -86,6 +87,31 @@ fun HomeScreen(
             viewModel.setFilterText(null)
         }
     }
+    val doAction: (HomeItem, ItemAction) -> Unit = { item, action ->
+        when (action) {
+            ItemAction.Archive -> {
+                viewModel.insertOrUpdate(
+                    item.copy(
+                        state = if (item.state == ItemState.Done) ItemState.Default
+                        else ItemState.Done
+                    ),
+                    modified = false
+                )
+            }
+            ItemAction.Pin -> {
+                viewModel.insertOrUpdate(
+                    item.copy(
+                        state = if (item.state == ItemState.Pinned) ItemState.Default
+                        else ItemState.Pinned
+                    ),
+                    modified = false
+                )
+            }
+            ItemAction.Delete -> {
+                viewModel.delete(item)
+            }
+        }
+    }
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -117,9 +143,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
-                    colors = SearchBarDefaults.colors(
-                        //containerColor = Color.Transparent
-                    ),
+                    colors = SearchBarDefaults.colors(),
                     shape = RoundedCornerShape(15.dp),
                     inputField = {
                         SearchBarDefaults.InputField(
@@ -136,18 +160,6 @@ fun HomeScreen(
                                 Text(placeholder)
                             },
                             leadingIcon = {
-//                                Icon(Icons.Default.Search, contentDescription = null)
-//                                Icon(
-//                                    painter = painterResource(R.drawable.icon_grid),
-//                                    contentDescription = null,
-//                                    tint = Color.Unspecified,
-//                                    modifier = Modifier.clickable {
-//                                        coroutineScope.launch {
-//                                            if (drawerState.isOpen) drawerState.close()
-//                                            else drawerState.open()
-//                                        }
-//                                    }
-//                                )
                                 Icon(
                                     painter = painterResource(R.drawable.bow_arrow),
                                     contentDescription = null,
@@ -218,7 +230,8 @@ fun HomeScreen(
                     uiState = uiState,
                     onHoldItem = { itemForEdit = it },
                     onFilter = viewModel::toggleFilterCategory,
-                    resetAutoScroll = viewModel::resetLastId
+                    resetAutoScroll = viewModel::resetLastId,
+                    onAction = doAction
                 )
                 itemForEdit?.let { item ->
                     ItemDialog(
@@ -230,10 +243,6 @@ fun HomeScreen(
                                 viewModel.insertOrUpdate(updated, modified = true)
                                 itemForEdit = null
                             }
-                        },
-                        onDeleteItem = {
-                            itemForEdit = null
-                            viewModel.delete(item)
                         },
                         hintCategories = uiState.items.isEmpty()
                     )
@@ -276,7 +285,8 @@ private fun HomeScreenContent(
     uiState: UiState,
     onHoldItem: (HomeItem) -> Unit,
     onFilter: (ItemCategory) -> Unit,
-    resetAutoScroll: () -> Unit
+    resetAutoScroll: () -> Unit,
+    onAction: (HomeItem, ItemAction) -> Unit
 ) {
     val sorted = uiState.items.sortedByDescending { it.state == ItemState.Pinned }
     val listState = rememberLazyListState()
@@ -291,13 +301,14 @@ private fun HomeScreenContent(
                 "${item.id}${item.modified}${item.state}"
             }
         ) { item ->
-            val owner = uiState.owners.first { it.ownerId == item.itemCreatorId }
             ItemCard(
                 item = item,
-                owner = owner,
                 isExpanded = false,
                 onHoldItem = { onHoldItem(item) },
-                onFilter = onFilter
+                onFilter = onFilter,
+                onAction = {
+                    onAction(item, it)
+                }
             )
         }
     }

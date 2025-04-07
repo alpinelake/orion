@@ -47,7 +47,16 @@ data class FilterState(
     val hideArchived: Boolean = false
 )
 
-enum class ItemSort(val text: String) { Date("Recent"), Name("Title") }
+enum class ItemSort(val text: String) {
+    Date("Recent"),
+    Name("Title")
+}
+
+enum class ItemAction {
+    Pin,
+    Archive,
+    Delete,
+}
 
 const val DefaultName = "Default"
 

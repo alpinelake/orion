@@ -10,9 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.orion.ui.HomeScreen
 import com.example.orion.ui.theme.AppTheme
@@ -28,9 +25,7 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
 
     private val mimeType = "application/octet-stream"
-
     private val viewModel: AppViewModel by viewModels()
-
     private val exportDatabaseFileLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument(mimeType)) { outputUri ->
         if (outputUri != null) {
             val databasePath = Uri.fromFile(getDatabasePath(AppModule.DATABASE_FILENAME))
@@ -63,19 +58,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-//            navigationBarStyle = SystemBarStyle.light(
-//                Color.Transparent.toArgb(), Color.Transparent.toArgb()
-//            )
+            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb())
         )
-
-        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-        insetsController.apply {
-            //hide(WindowInsetsCompat.Type.statusBars())
-            //hide(WindowInsetsCompat.Type.navigationBars())
-            //systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        }
-
 
         setContent {
             AppTheme(darkTheme = true) {

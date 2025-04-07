@@ -9,20 +9,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.TaskAlt
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,14 +36,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.orion.DefaultName
 import com.example.orion.UiState
 import com.example.orion.data.FakeDataRepository
 import com.example.orion.data.HomeItem
 import com.example.orion.data.ItemCategory
-import com.example.orion.data.ItemState
 import com.example.orion.data.Owner
 import com.example.orion.data.toHomeItem
 import com.example.orion.ui.theme.AppTheme
@@ -60,7 +53,6 @@ fun ItemDialog(
     item: HomeItem,
     onDismissRequest: () -> Unit,
     onSaveItem: (HomeItem) -> Unit,
-    onDeleteItem: () -> Unit,
     hintCategories: Boolean = false
 ) {
     Dialog(
@@ -71,7 +63,6 @@ fun ItemDialog(
             owner = uiState.owners.firstOrNull { it.ownerId == item.itemCreatorId },
             onSave = onSaveItem,
             onDismissRequest = onDismissRequest,
-            onDelete = onDeleteItem,
             hintCategories = hintCategories
         )
     }
@@ -83,7 +74,6 @@ private fun ItemDialogContent(
     owner: Owner?,
     onSave: (HomeItem) -> Unit,
     onDismissRequest: () -> Unit,
-    onDelete: () -> Unit,
     hintCategories: Boolean = false
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -112,63 +102,6 @@ private fun ItemDialogContent(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 15.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(1.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable(enabled = item.id != 0) {
-                            onDelete()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            "Delete",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.TaskAlt,
-                        contentDescription = null,
-                        tint = if (state == ItemState.Done) color
-                        else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable {
-                            state = if (state == ItemState.Done) ItemState.Default
-                            else ItemState.Done
-                            save()
-                        }
-                    )
-                    Icon(
-                        imageVector = Icons.Default.PushPin,
-                        contentDescription = null,
-                        tint = if (state == ItemState.Pinned) color
-                        else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable {
-                            state = if (state == ItemState.Pinned) ItemState.Default
-                            else ItemState.Pinned
-                            save()
-                        }
-                    )
-                }
-            }
             Row(
                 modifier = Modifier,
                 verticalAlignment = Alignment.CenterVertically,
@@ -278,8 +211,7 @@ private fun ItemDialogContentPreview() {
             item = item,
             owner = owner,
             onSave = {},
-            onDismissRequest = {},
-            onDelete = {}
+            onDismissRequest = {}
         )
     }
 }
@@ -294,8 +226,7 @@ private fun ItemDialogContentFriendPreview() {
             item = item,
             owner = owner,
             onSave = {},
-            onDismissRequest = {},
-            onDelete = {}
+            onDismissRequest = {}
         )
     }
 }

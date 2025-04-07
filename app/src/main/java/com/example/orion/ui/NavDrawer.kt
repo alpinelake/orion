@@ -29,7 +29,7 @@ fun NavDrawerSheet(
         NavigationDrawerItem(
             icon = { Icon(Icons.Default.Download, contentDescription = null) },
             label = {
-                Text(text = "Export data...")
+                Text(text = "Export database")
             },
             selected = false,
             onClick = {
@@ -39,7 +39,7 @@ fun NavDrawerSheet(
         NavigationDrawerItem(
             icon = { Icon(Icons.Default.FileOpen, contentDescription = null) },
             label = {
-                Text(text = "Import data...")
+                Text(text = "Import database")
             },
             selected = false,
             onClick = {

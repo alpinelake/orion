@@ -3,6 +3,7 @@ package com.example.orion.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -31,23 +32,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.orion.ItemAction
 import com.example.orion.data.FakeDataRepository
 import com.example.orion.data.HomeItem
 import com.example.orion.data.ItemCategory
 import com.example.orion.data.ItemState
-import com.example.orion.data.Owner
 import com.example.orion.data.toHomeItem
+import com.example.orion.ui.component.ItemActionMenu
 import com.example.orion.ui.theme.AppTheme
 
 @Composable
 fun ItemCard(
     modifier: Modifier = Modifier,
     item: HomeItem,
-    owner: Owner,
     isExpanded: Boolean = false,
     onHoldItem: () -> Unit,
-    onFilter: (ItemCategory) -> Unit
+    onFilter: (ItemCategory) -> Unit,
+    onAction: (ItemAction) -> Unit
 ) {
     val highlight = colorResource(item.category.colorId())
     var expanded by remember { mutableStateOf(isExpanded) }
@@ -114,16 +115,23 @@ fun ItemCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(5.dp),
-                        modifier = Modifier.alpha(if (owner.isDefault()) 0f else .5f)
-                    ) {
+                    Box {
+                        var expandActions by remember { mutableStateOf(false) }
                         Icon(
-                            imageVector = Icons.Default.Person,
+                            imageVector = Icons.Default.MoreHoriz,
                             contentDescription = null,
-                            modifier = Modifier
+                            modifier = Modifier.alpha(.5f).clickable {
+                                expandActions = !expandActions
+                            }
                         )
-                        Text(owner.name, fontSize = 15.sp)
+                        ItemActionMenu(
+                            item = item,
+                            expanded = expandActions,
+                            onSelect = onAction,
+                            onDismiss = {
+                                expandActions = !expandActions
+                            }
+                        )
                     }
                     Text(
                         text = item.date(),
@@ -148,15 +156,13 @@ private class ItemProvider: PreviewParameterProvider<HomeItem> {
 private fun ItemCardPreview(
     @PreviewParameter(ItemProvider::class) item: HomeItem
 ) {
-    val owner = FakeDataRepository.owners.first { it.ownerId == item.itemCreatorId }
-
     AppTheme(darkTheme = true) {
         ItemCard(
             item = item,
-            owner = owner,
             onHoldItem = {},
             isExpanded = item.id == 1 || item.id == 5,
-            onFilter = {}
+            onFilter = {},
+            onAction = {}
         )
     }
 }
